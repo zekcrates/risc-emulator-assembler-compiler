@@ -101,9 +101,12 @@ def read_line(line):
         bit_10_5  = (imm>> 5) & 0x3F # get 6 bits 
         bit_4_1 = (imm>> 1 ) & 0xF 
         bit_11 = (imm>> 11) & 0x1 
-               
+
         funct3 = S_TYPE[instr]["funct3"]
         opcode = S_TYPE[instr]["opcode"]
+
+        instruction = (bit12 << 31)| (bit_10_5 << 25 ) | (rs2 << 20) | (rs1 << 15 ) | (funct3 << 12)| (bit_4_1 << 8 ) | (bit_11 << 7) | opcode 
+         
     return instruction
 
 
