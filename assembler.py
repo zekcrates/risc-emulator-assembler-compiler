@@ -48,6 +48,14 @@ B_TYPE=  {
 }
 
 
+U_TYPE = {
+
+}
+
+J_TYPE = {
+    "JAL": {"opcode": Ops.JAL.value}
+}
+
 
 def read_line(line):
     # ignore the comments 
@@ -106,7 +114,22 @@ def read_line(line):
         opcode = S_TYPE[instr]["opcode"]
 
         instruction = (bit12 << 31)| (bit_10_5 << 25 ) | (rs2 << 20) | (rs1 << 15 ) | (funct3 << 12)| (bit_4_1 << 8 ) | (bit_11 << 7) | opcode 
-         
+
+
+    elif instr in J_TYPE:
+        # JAL x1, 32
+ 
+        rd    = regmap[tokens[1]] & 0x1F
+        imm = tokens[2]
+        imm = imm & 0x1FFFFF # get 21 bits 
+
+        bit_20 = (imm >> 20) & 0x1 
+        bit_10_1 = (imm>> 1 ) & 0x3FF
+        bit_11 = (imm>>11) & 0x1 
+        bits_19_12 = (imm>>  12) & 0xFF 
+
+        instruction = (bit_20 << 31) | (bit_10_1 << 21)  | (bit_11 << 20) | (bits_19_12 << 12 ) |(rd << 7) | opcode 
+
     return instruction
 
 
