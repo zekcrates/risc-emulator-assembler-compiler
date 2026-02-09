@@ -31,6 +31,26 @@ R_TYPE = {
 }
 
 
+I_TYPE = {
+    "ADDI": {"funct3": 0b000, "opcode": 0b0010011}, 
+    "XORI": {"funct3": 0b100, "opcode": 0b0010011},
+    "ORI": {"funct3": 0b110, "opcode": 0b0010011},
+    "ANDI": {"funct3": 0b111, "opcode": 0b0010011},
+    "ANDI": {"funct3": 0b111, "opcode": 0b0010011},
+    "SLTI": {"funct3": 0b010, "opcode": 0b0010011}, 
+    "SLTIU": {"funct3": 0b011, "opcode": 0b0010011}, 
+
+    "LB": {"funct3": 0b000, "opcode": 0b0000011},
+    "LH": {"funct3": 0b001, "opcode": 0b0000011},
+    "LW": {"funct3": 0b010, "opcode": 0b0000011},
+    "LBU": {"funct3": 0b100, "opcode": 0b0000011},
+    "LHU": {"funct3": 0b101, "opcode": 0b0000011},
+
+    "SLLI": {}, 
+    "SRAI": {}, 
+    "SRLI": {}
+     
+}
 
 S_TYPE = {
     "SB": {"funct3": 0b000, "opcode": Ops.STORE.value},
@@ -49,12 +69,16 @@ B_TYPE=  {
 
 
 U_TYPE = {
-
+    "LUI" : {"opcode": 0b0110111},
+    "AUIPC": {"opcode": 0b0010111}
 }
+
 
 J_TYPE = {
     "JAL": {"opcode": Ops.JAL.value}
 }
+
+
 
 
 def read_line(line):
@@ -110,8 +134,9 @@ def read_line(line):
         bit_4_1 = (imm>> 1 ) & 0xF 
         bit_11 = (imm>> 11) & 0x1 
 
-        funct3 = S_TYPE[instr]["funct3"]
-        opcode = S_TYPE[instr]["opcode"]
+        funct3 = B_TYPE[instr]["funct3"]
+        opcode = B_TYPE[instr]["opcode"]
+
 
         instruction = (bit12 << 31)| (bit_10_5 << 25 ) | (rs2 << 20) | (rs1 << 15 ) | (funct3 << 12)| (bit_4_1 << 8 ) | (bit_11 << 7) | opcode 
 
@@ -120,15 +145,22 @@ def read_line(line):
         # JAL x1, 32
  
         rd    = regmap[tokens[1]] & 0x1F
-        imm = tokens[2]
-        imm = imm & 0x1FFFFF # get 21 bits 
+        imm = int(tokens[2]) & 0x1FFFFF # get 21 bits 
 
         bit_20 = (imm >> 20) & 0x1 
         bit_10_1 = (imm>> 1 ) & 0x3FF
         bit_11 = (imm>>11) & 0x1 
+        opcode = J_TYPE[instr]["opcode"]
         bits_19_12 = (imm>>  12) & 0xFF 
 
         instruction = (bit_20 << 31) | (bit_10_1 << 21)  | (bit_11 << 20) | (bits_19_12 << 12 ) |(rd << 7) | opcode 
+
+    elif instr in U_TYPE:
+        # LUI x5, 0x12345  
+        rd = regmap[tokens[1]] & 0x1F 
+        imm = int(tokens[2]) & 0xFFFFF # take 20 bits 
+
+        instruction = (imm << 12) | (rd << 7 ) | opcode 
 
     return instruction
 
