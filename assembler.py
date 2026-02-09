@@ -46,9 +46,9 @@ I_TYPE = {
     "LBU": {"funct3": 0b100, "opcode": 0b0000011},
     "LHU": {"funct3": 0b101, "opcode": 0b0000011},
 
-    "SLLI": {}, 
-    "SRAI": {}, 
-    "SRLI": {}
+    "SLLI": {"funct3": 0b001, "funct7": 0b0000000, "opcode": 0b0010011},
+    "SRLI": {"funct3": 0b101, "funct7": 0b0000000, "opcode": 0b0010011},
+    "SRAI": {"funct3": 0b101, "funct7": 0b0100000, "opcode": 0b0010011},
      
 }
 
@@ -161,6 +161,28 @@ def read_line(line):
         imm = int(tokens[2]) & 0xFFFFF # take 20 bits 
 
         instruction = (imm << 12) | (rd << 7 ) | opcode 
+
+    elif instr in I_TYPE:
+        if instr in ["SLLI", "SRLI", "SRAI"]:
+            # shamt 
+            shamt = int(tokens[3]) & 0x1F   # 5 bits only
+            rd = regmap[tokens[1]] & 0x1F
+            rs1 = regmap[tokens[2]] & 0x1F
+            funct3 = I_TYPE[instr]["funct3"]
+            funct7 = I_TYPE[instr]["funct7"]
+            opcode = I_TYPE[instr]["opcode"]
+
+            instruction = (funct7 << 25) | (shamt << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
+
+        else:
+            rd = regmap[tokens[1]] & 0x1F
+            rs1 = regmap[tokens[2]] & 0x1F 
+            imm = int(tokens[3]) & 0xFFF 
+            funct3 = I_TYPE[instr]["funct3"]
+            opcode = I_TYPE[instr]["opcode"]
+            instruction = (imm << 20) | (rs1 << 15) | (funct3 << 12) | (rd << 7) | opcode
+
+
 
     return instruction
 
